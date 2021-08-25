@@ -1,0 +1,20 @@
+for quadrat in range(len(indexe_stück)):
+        radius=stück.drehradius_geben(quadrat)
+        betta=math.atan(stück.VERHÄLTNISSE_DREHPUNKT[quadrat][1]/stück.VERHÄLTNISSE_DREHPUNKT[quadrat][0])
+        for alpha in range(90,0,-10):
+            abstand=math.sin(alpha)*radius
+            x_abstand=math.cos(betta)*abstand
+            y_abstand=math.sin(betta)*abstand
+            if stück.ausrichtung==1:
+                geschnittener_kasten=[int(stück.DREHPUNKT[0]+x_abstand),int(stück.DREHPUNKT[1]+y_abstand)]
+            elif stück.ausrichtung==2:
+                geschnittener_kasten=[int(stück.DREHPUNKT[0]-stück.VERHÄLTNISSE_DREHPUNKT[quadrat][1]),int(stück.DREHPUNKT[1]-x_abstand)]
+            elif stück.ausrichtung==3:
+                geschnittener_kasten=[int(stück.DREHPUNKT[0]-x_abstand),int(stück.DREHPUNKT[1]-y_abstand)]
+            elif stück.ausrichtung==4:
+                geschnittener_kasten=[int(stück.DREHPUNKT[0]+y_abstand),int(stück.DREHPUNKT[1]+x_abstand)]
+            if geschnittener_kasten[0]<0 or geschnittener_kasten[0]>len(übersicht_liste[0])-1 or geschnittener_kasten[1]<0 or geschnittener_kasten[1]>len(übersicht_liste)-1 or übersicht_liste[geschnittener_kasten[0]][geschnittener_kasten[1]]:
+                return False
+
+def drehradius_geben(self,quadrat):
+        return math.sqrt(self.VERHÄLTNISSE_DREHPUNKT[quadrat][0]**2+self.VERHÄLTNISSE_DREHPUNKT[quadrat][1]**2)
