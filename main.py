@@ -26,32 +26,29 @@ werte_stücke = []
 
 class STÜCK:
 
-    x = 0
-    y = 0
 
     def __init__(self, farbe, drehpunkt, verhältnisse_drehpunkt, ausrichtung, drehbar):
         self.quadrate = []
-        self.FARBE = farbe
-        self.DREHPUNKT = drehpunkt
-        self.VERHÄLTNISSE_DREHPUNKT = verhältnisse_drehpunkt
+        self.farbe = farbe
+        self.drehpunkt = drehpunkt
+        self.verhältnisse_drehpunkt = verhältnisse_drehpunkt
         self.ausrichtung = ausrichtung
-        self.DREHBAR = drehbar
-        indexe_stück = self.indexe_stück_geben()
-        for quadrat in range(len(indexe_stück)):
-            self.quadrate.append(pygame.Rect(SEITENABSTAND + indexe_stück[quadrat][0] * KASTENLÄNGE + self.x, indexe_stück[quadrat][1] * KASTENLÄNGE + self.y, KASTENLÄNGE, KASTENLÄNGE))
-        x, y = self.DREHPUNKT[0] * KASTENLÄNGE, self.DREHPUNKT[1] * KASTENLÄNGE
+        self.drehbar = drehbar
+        self.x = self.drehpunkt[0] * KASTENLÄNGE 
+        self.y = self.drehpunkt[1] * KASTENLÄNGE
         return
 
     def aktualisieren_zeichnen(self):
         indexe_stück = self.indexe_stück_geben()
         for quadrat in range(len(indexe_stück)):
-            self.quadrate[quadrat] = (pygame.Rect(SEITENABSTAND + indexe_stück[quadrat][0] * KASTENLÄNGE, indexe_stück[quadrat][1] * KASTENLÄNGE, KASTENLÄNGE, KASTENLÄNGE))
-            pygame.draw.rect(FEN, self.FARBE, self.quadrate[quadrat])
+            pygame.draw.rect(FEN, self.farbe, pygame.Rect(SEITENABSTAND + indexe_stück[quadrat][0] * KASTENLÄNGE, indexe_stück[quadrat][1] * KASTENLÄNGE, KASTENLÄNGE, KASTENLÄNGE))
 
     def verschieben_und_prüfen(self):
         möglich = False
         while not möglich:
-            self.x = KASTENLÄNGE * random.randint(0, int(SPIEL_FELD_BREITE / KASTENLÄNGE))
+            verschiebung = random.randint(0, int(SPIEL_FELD_BREITE / KASTENLÄNGE))
+            self.x = KASTENLÄNGE * verschiebung
+            self.drehpunkt[0] = verschiebung
             indexe_stück = self.indexe_stück_geben()
             for quadrat in range(len(indexe_stück)):
                 if indexe_stück[quadrat][0] < 0 or indexe_stück[quadrat][0] >= int(SPIEL_FELD_BREITE / KASTENLÄNGE):
@@ -62,29 +59,30 @@ class STÜCK:
 
     def fallen(self):
         self.y += KASTENLÄNGE
+        self.drehpunkt[1] += 1
         return
 
     def nach_rechts_bewegen(self):
         self.x += KASTENLÄNGE
+        self.drehpunkt[0] += 1
         return
 
     def nach_links_bewegen(self):
         self.x -= KASTENLÄNGE
+        self.drehpunkt[0] -= 1
         return
 
     def indexe_stück_geben(self):
         indexe_stück = []
-        for quadrat in range(len(self.VERHÄLTNISSE_DREHPUNKT)):
+        for quadrat in range(len(self.verhältnisse_drehpunkt)):
             if self.ausrichtung == 0:
-                indexe_stück.append([self.DREHPUNKT[0] + self.VERHÄLTNISSE_DREHPUNKT[quadrat][0], self.DREHPUNKT[1] + self.VERHÄLTNISSE_DREHPUNKT[quadrat][1]])
+                indexe_stück.append([self.drehpunkt[0] + self.verhältnisse_drehpunkt[quadrat][0], self.drehpunkt[1] + self.verhältnisse_drehpunkt[quadrat][1]])
             elif self.ausrichtung == 1:
-                indexe_stück.append([self.DREHPUNKT[0] - self.VERHÄLTNISSE_DREHPUNKT[quadrat][1], self.DREHPUNKT[1] + self.VERHÄLTNISSE_DREHPUNKT[quadrat][0]])
+                indexe_stück.append([self.drehpunkt[0] - self.verhältnisse_drehpunkt[quadrat][1], self.drehpunkt[1] + self.verhältnisse_drehpunkt[quadrat][0]])
             elif self.ausrichtung == 2:
-                indexe_stück.append([self.DREHPUNKT[0] - self.VERHÄLTNISSE_DREHPUNKT[quadrat][0], self.DREHPUNKT[1] - self.VERHÄLTNISSE_DREHPUNKT[quadrat][1]])
+                indexe_stück.append([self.drehpunkt[0] - self.verhältnisse_drehpunkt[quadrat][0], self.drehpunkt[1] - self.verhältnisse_drehpunkt[quadrat][1]])
             elif self.ausrichtung == 3:
-                indexe_stück.append([self.DREHPUNKT[0] + self.VERHÄLTNISSE_DREHPUNKT[quadrat][1], self.DREHPUNKT[1] - self.VERHÄLTNISSE_DREHPUNKT[quadrat][0]])
-            indexe_stück[quadrat][0] += int(self.x / KASTENLÄNGE)
-            indexe_stück[quadrat][1] += int(self.y / KASTENLÄNGE)
+                indexe_stück.append([self.drehpunkt[0] + self.verhältnisse_drehpunkt[quadrat][1], self.drehpunkt[1] - self.verhältnisse_drehpunkt[quadrat][0]])
         return indexe_stück
 
     def ausrichtung_aendern(self, richtung):
@@ -223,23 +221,27 @@ def fallen_oberer_stücke(übersicht_liste, stücke):
     verhindernde_stücke = {}
     nochmal_checken = False
     stück = 0
-    while stücke < len(stücke):
+    while stück < len(stücke):
         indexe_stück = stücke[stück].indexe_stück_geben()
         übersicht_liste_zurücksetzen(übersicht_liste, indexe_stück)
-        ist_gefallen = fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
+        ist_gefallen= fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
+        indexe_stück = stücke[stück].indexe_stück_geben()
+        übersicht_liste_aktualisieren(übersicht_liste, indexe_stück)
         if ist_gefallen:
             nochmal_checken = True
+        stück += 1
     return nochmal_checken
 
 
 def fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste):
+    ist_gefallen = False
     möglich = fallen_oberes_stück(stücke, stück, übersicht_liste)
     if möglich:
         ist_gefallen = True
     else:
-        ist_verhakung_entfernt = verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke)
+        ist_verhakung_entfernt = verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
         if ist_verhakung_entfernt:
-            fallen_und_verhakungen_entfernen()
+            fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
     return ist_gefallen
 
 
@@ -253,16 +255,19 @@ def fallen_oberes_stück(stücke, stück, übersicht_liste):
     return möglich
 
 
-def verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke):
+def verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste):
     ist_verhakung_entfernt = False
     verhindernde_stücke[stück] = verhindernde_stücke_geben(stücke, stück, indexe_stück)
     if len(verhindernde_stücke[stück]) > 0:
         verhaktes_stück = verhakung_geben(stück, verhindernde_stücke)
         if verhaktes_stück is not None:
             zu_einem_stück_machen(stücke, stück, indexe_stück, verhaktes_stück)
-            abhängigkeiten_zurücksetzen()
+            indexe_stück = stücke[len(stücke) - 1].indexe_stück_geben()
+            übersicht_liste_aktualisieren(übersicht_liste, indexe_stück)
+            abhängigkeiten_zurücksetzen(stücke, stück, verhindernde_stücke, verhaktes_stück)
             indexe_stück = stücke[stück].indexe_stück_geben()
-            übersicht_liste_zurücksetzen()
+            übersicht_liste_zurücksetzen(übersicht_liste, indexe_stück)
+            ist_verhakung_entfernt = True
     return ist_verhakung_entfernt
 
 
@@ -289,28 +294,27 @@ def verhakung_geben(stück, verhindernde_stücke):
 def zu_einem_stück_machen(stücke, stück, indexe_stück, verhaktes_stück):
     indexe_stück_verhakt = stücke[verhaktes_stück].indexe_stück_geben()
     alle_indexe = indexe_stück + indexe_stück_verhakt
-    verhältnisse_drehpunkt = verhältnisse_drehpunkt_finden(alle_indexe)
-    neues_stück = STÜCK((50, 50 , 50), alle_indexe[0], verhältnisse_drehpunkt, stücke[stück].ausrichtung, False)  # könnte wegen ausrichtung nicht funktionieren        
-    stücke.append(neues_stück)
+    drehpunkt_verschoben = []
+    drehpunkt_verschoben[0] = stücke[stück].DREHPUNKT + int(stücke[stück].x / KASTENLÄNGE)
+    drehpunkt_verschoben[1] = stücke[stück].DREHPUNKT + int(stücke[stück].y / KASTENLÄNGE)
+    verhältnisse_drehpunkt = verhältnisse_drehpunkt_finden(indexe_stück_verhakt, drehpunkt_verschoben)
+    stücke[stück].VERHÄLTNISSE_DREHPUNKT = verhältnisse_drehpunkt       
     return
 
 
-def verhältnisse_drehpunkt_finden(alle_indexe):
+def verhältnisse_drehpunkt_finden(alle_indexe, drehpunkt):
     verhältnisse_drehpunkt = []
     for indexe in range(len(alle_indexe)):
-        verhältnisse_drehpunkt.append([alle_indexe[indexe][0] - alle_indexe[0][0], alle_indexe[indexe][1] - alle_indexe[0][1]])
+        verhältnisse_drehpunkt.append([alle_indexe[indexe][0] - drehpunkt[0], alle_indexe[indexe][1] - drehpunkt[1]])
     return verhältnisse_drehpunkt
 
 
 def abhängigkeiten_zurücksetzen(stücke, stück, verhindernde_stücke, verhaktes_stück):
-    del verhindernde_stücke[stück]
-    del verhindernde_stücke[verhaktes_stück]
-    del stücke[stück]
-    if verhaktes_stück <= stück:
-        del stücke[verhaktes_stück - 1]
-    else:
-        del stücke[verhaktes_stück]
-    return 
+    verhindernde_stücke[stück] = verhindernde_stücke[stück] + verhindernde_stücke[verhaktes_stück]
+    verhindernde_stücke[stück].remove(stück)
+    verhindernde_stücke[stück].remove(verhaktes_stück)
+    del stücke[verhaktes_stück]
+    return
 
 
 def drehen_möglich(indexe_stück, übersicht_liste, stück, richtung):
@@ -389,13 +393,13 @@ def main():
     übersicht_liste = übersicht_liste_machen()
     werte_l_stück_rechts = [LIMETTE, [0, 1], [[0, -1], [0, 0], [0, 1], [1, 1]], [True]]
     werte_l_stück_links = [LILA, [0, 1], [[0, -1], [0, 0], [0, 1], [-1, 1]], [True]]
-    werte_platte = [BLAU, [0, 2], [[0, -2], [0, -1], [0, 0], [0, 1]], [True]]
+    werte_platte = [BLAU, [0, 1], [[0, -2], [0, -1], [0, 0], [0, 1]], [True]]
     werte_quadrat = [ROT, [0, 0], [[0, 0], [1, 0], [0, 1], [1, 1]], [False]]
     werte_werte_l_stück_rechts_kurz = [(125, 0, 0), [0, 1], [[0, -1], [0, 0], [1, 0]], [True]]
     werte_dreieck = [(0,125,0), [0, 1], [[0, -1], [0, 0], [1, 0], [0, 1]], [True]]
     werte_punkt = [(125,125,0), [0, 2], [[0, 0]], [False]]
     werte_u = [(0,0,125), [0, 2], [[-1, -1], [-1, 0], [0, 0], [1, 0], [1, -1]], [True]]
-    werte_stücke  = [werte_u, werte_punkt, werte_platte]
+    werte_stücke  = [werte_punkt, werte_platte, werte_l_stück_rechts, werte_u]
     stücke = []
     stücke = zufälliges_stück_machen(stücke, werte_stücke)
     uhr = pygame.time.Clock()
