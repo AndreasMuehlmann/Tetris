@@ -14,13 +14,14 @@ SEITENABSTAND = 200
 DICKE_LINIE = 4
 SPIEL_FELD_BREITE = BREITE - SEITENABSTAND * 2
 KASTENLÄNGE = int((SPIEL_FELD_BREITE) / 10)
-HÖHE = KASTENLÄNGE * 16
+HÖHE = KASTENLÄNGE * 20
 SPIEL_FELD_HÖHE = HÖHE - KASTENLÄNGE
 FEN = pygame.display.set_mode((BREITE, HÖHE))
 pygame.display.set_caption('TETRIS')
 FPS = 60
-NORMAL_GESCHWINDIGKEIT = 30
-VERZÖGERUNG_BEWEGEN = 10
+NORMAL_GESCHWINDIGKEIT = 15
+VERZÖGERUNG_BEWEGEN = 5
+VERZÖGERUNG_DREHEN = 5
 werte_stücke = []
 
 
@@ -140,14 +141,17 @@ def volle_zeilen_geben(übersicht_liste):
 
 
 def volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen, score):
-    volle_zeilen_aus_übersicht_liste_zurücksetzen(übersicht_liste, volle_zeilen)
-    quadrate_voller_zeilen_löschen(stücke, volle_zeilen)
-    geteilte_stücke_zu_einzelnen_stücken_machen(stücke)
+    if len(volle_zeilen) > 0:
+        volle_zeilen_aus_übersicht_liste_zurücksetzen(übersicht_liste, volle_zeilen)
+        quadrate_voller_zeilen_löschen(stücke, volle_zeilen)
+        stücke = geteilte_stücke_zu_einzelnen_stücken_machen(stücke)
     nochmal_checken = fallen_oberer_stücke(übersicht_liste, stücke)
+    plus_score = 0
     if nochmal_checken:
-        volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen_geben(übersicht_liste), score)
+        plus_score, stücke = volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen_geben(übersicht_liste), 0)
     score += len(volle_zeilen)
-    return score
+    score += plus_score
+    return score, stücke
 
 
 def volle_zeilen_aus_übersicht_liste_zurücksetzen(übersicht_liste, volle_zeilen):
@@ -179,6 +183,7 @@ def geteilte_stücke_zu_einzelnen_stücken_machen(stücke):
     for bruch_stück in range(len(geteilte_stücke)):
         stück = copy.deepcopy(STÜCK(geteilte_stücke[bruch_stück][0], geteilte_stücke[bruch_stück][1], geteilte_stücke[bruch_stück][2],geteilte_stücke[bruch_stück][3], geteilte_stücke[bruch_stück][4]))
         stücke.append(stück)
+    return stücke
 
 
 def geteilte_stücke_geben(stücke):
@@ -191,7 +196,7 @@ def geteilte_stücke_geben(stücke):
             del indexe_stück[0]
             war_verbindung = True
             while war_verbindung:
-                war_verbindung = verbindung_festellen_und_einordnen(indexe_stück, geteilte_stücke[stück])
+                war_verbindung = verbindung_festellen_und_einordnen(indexe_stück, geteilte_stücke[len(geteilte_stücke) - 1])
             if len(indexe_stück) == 0:
                 alle_quadrate_eingeordnet = True
     return geteilte_stücke
@@ -223,11 +228,11 @@ def verhältnis_drehpunkt_geben(quadrat, drehpunkt, ausrichtung):
     if ausrichtung == 0:
         return [quadrat[0] - drehpunkt[0], quadrat[1] - drehpunkt[1]]
     elif ausrichtung == 1:
-        return [quadrat[1] + drehpunkt[0], quadrat[0] - drehpunkt[1]]
+        return [drehpunkt[0] - quadrat[1], quadrat[0] - drehpunkt[1]]
     elif ausrichtung == 2:
-        return [quadrat[0] + drehpunkt[0], quadrat[1] + drehpunkt[1]]
+        return [drehpunkt[0] - quadrat[0], drehpunkt[1] - quadrat[0]]
     elif ausrichtung == 3:
-        return [quadrat[1] - drehpunkt[0], quadrat[0] + drehpunkt[1]]
+        return [quadrat[1] - drehpunkt[0], drehpunkt[1] - quadrat[0]]
 
 
 def fallen_oberer_stücke(übersicht_liste, stücke):
@@ -401,7 +406,7 @@ def main():
     werte_dreieck = [(0,125,0), [0, 1], [[0, -1], [0, 0], [1, 0], [0, 1]], [True]]
     werte_punkt = [(125,125,0), [0, 2], [[0, 0]], [False]]
     werte_u = [(0,0,125), [0, 2], [[-1, -1], [-1, 0], [0, 0], [1, 0], [1, -1]], [True]]
-    werte_stücke  = [werte_punkt, werte_platte]
+    werte_stücke  = [werte_platte, werte_l_stück_rechts, werte_l_stück_links, werte_quadrat, werte_werte_l_stück_rechts_kurz, werte_dreieck]
     stücke = []
     stücke = zufälliges_stück_machen(stücke, werte_stücke)
     uhr = pygame.time.Clock()
@@ -442,15 +447,17 @@ def main():
                 übersicht_liste_aktualisieren(übersicht_liste, indexe_stück)
                 volle_zeilen = volle_zeilen_geben(übersicht_liste)
                 if len(volle_zeilen) > 0:
-                     score = volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen, score)
+                     score, stücke = volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen, score)
                 stücke = zufälliges_stück_machen(stücke, werte_stücke)
                 zähler_fallen = -1
                 continue
-        if tasten_gedrückt[pygame.K_RIGHT] and stücke[stück].drehbar and drehen_möglich(indexe_stück, übersicht_liste, stücke[stück],'rechts') and not stücke[stück].drehpunkt == [0, 0] and zähler_drehen >= VERZÖGERUNG_BEWEGEN:
+        if (tasten_gedrückt[pygame.K_RIGHT] and stücke[stück].drehbar and
+            drehen_möglich(indexe_stück, übersicht_liste, stücke[stück],'rechts') and zähler_drehen >= VERZÖGERUNG_DREHEN):
             stücke[stück].ausrichtung_aendern('rechts')
             indexe_stück = stücke[stück].indexe_stück_geben()
             zähler_drehen = -1
-        if tasten_gedrückt[pygame.K_LEFT] and stücke[stück].drehbar and drehen_möglich(indexe_stück, übersicht_liste, stücke[stück],'links') and not stücke[stück].drehpunkt == [0, 0] and zähler_drehen >= VERZÖGERUNG_BEWEGEN:
+        if (tasten_gedrückt[pygame.K_LEFT] and stücke[stück].drehbar and 
+            drehen_möglich(indexe_stück, übersicht_liste, stücke[stück],'links') and zähler_drehen >= VERZÖGERUNG_DREHEN):
             stücke[stück].ausrichtung_aendern('links')
             indexe_stück = stücke[stück].indexe_stück_geben()
             zähler_drehen = -1
