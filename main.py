@@ -16,10 +16,13 @@ SPIEL_FELD_BREITE = BREITE - SEITENABSTAND * 2
 KASTENLÄNGE = int((SPIEL_FELD_BREITE) / 10)
 HÖHE = KASTENLÄNGE * 20
 SPIEL_FELD_HÖHE = HÖHE - KASTENLÄNGE
+ABSTAND_ZEILEN_SCORE = 40
+BREITE_ZAHL = 20
+ANZAHL_PASSENDER_ZIFFERN =  (SEITENABSTAND // BREITE_ZAHL) 
 FEN = pygame.display.set_mode((BREITE, HÖHE))
 pygame.display.set_caption('TETRIS')
 FPS = 60
-NORMAL_GESCHWINDIGKEIT = 15
+NORMAL_GESCHWINDIGKEIT = 5
 VERZÖGERUNG_BEWEGEN = 5
 VERZÖGERUNG_DREHEN = 5
 werte_stücke = []
@@ -149,8 +152,9 @@ def volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe
     plus_score = 0
     if nochmal_checken:
         plus_score, stücke = volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen_geben(übersicht_liste), 0)
-    score += len(volle_zeilen)
-    score += plus_score
+    plus_score += len(volle_zeilen)
+    score_rechner = lambda plus_score: plus_score ** 4
+    score += score_rechner(plus_score)
     return score, stücke
 
 
@@ -383,15 +387,18 @@ def pausieren(Uhr):
 
 def FEN_zeichnen(stücke, score):
     FEN.fill(SCHWARZ)
+    score = 31773451057
     pygame.draw.line(FEN, GRAU, (SEITENABSTAND - DICKE_LINIE, 0), (SEITENABSTAND - DICKE_LINIE, HÖHE + DICKE_LINIE + 2 - KASTENLÄNGE), DICKE_LINIE)
     pygame.draw.line(FEN, GRAU, (BREITE - SEITENABSTAND + DICKE_LINIE, 0), (BREITE - SEITENABSTAND + DICKE_LINIE, HÖHE + DICKE_LINIE + 2 - KASTENLÄNGE), DICKE_LINIE)
     pygame.draw.line(FEN, GRAU, (SEITENABSTAND - int(DICKE_LINIE / 2),HÖHE + DICKE_LINIE - KASTENLÄNGE), (BREITE - SEITENABSTAND + int(DICKE_LINIE / 2),HÖHE + DICKE_LINIE - KASTENLÄNGE), DICKE_LINIE)
-    for kasten in range(1, int(SPIEL_FELD_BREITE/ KASTENLÄNGE)):
-        pygame.draw.line(FEN, GRAU, (SEITENABSTAND - DICKE_LINIE + kasten, 0), (SEITENABSTAND - DICKE_LINIE + kasten, HÖHE + int(DICKE_LINIE * 1.5) - KASTENLÄNGE), int(DICKE_LINIE / 2))
     for stück in range(len(stücke)):
         stücke[stück].aktualisieren_zeichnen()
-    score_text = basic_font.render('SCORE: ' + str(score), True, (255,255,255))
-    FEN.blit(score_text, (20,20))
+    score_text = basic_font.render('score: ', True, (255,255,255))
+    FEN.blit(score_text, (9,10))
+    score = str(score)
+    for zeile in range(len(score) // ANZAHL_PASSENDER_ZIFFERN + 1):
+        score_text = basic_font.render(score[zeile * ANZAHL_PASSENDER_ZIFFERN:ANZAHL_PASSENDER_ZIFFERN * (zeile + 1)], True, (255,255,255))
+        FEN.blit(score_text, (9, 40 + ABSTAND_ZEILEN_SCORE * zeile))
     pygame.display.update()
 
 
