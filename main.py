@@ -22,7 +22,7 @@ ANZAHL_PASSENDER_ZIFFERN =  (SEITENABSTAND // BREITE_ZAHL)
 FEN = pygame.display.set_mode((BREITE, HÖHE))
 pygame.display.set_caption('TETRIS')
 FPS = 60
-NORMAL_GESCHWINDIGKEIT = 5
+NORMAL_GESCHWINDIGKEIT = 20
 VERZÖGERUNG_BEWEGEN = 5
 VERZÖGERUNG_DREHEN = 5
 werte_stücke = []
@@ -152,9 +152,8 @@ def volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe
     plus_score = 0
     if nochmal_checken:
         plus_score, stücke = volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen_geben(übersicht_liste), 0)
-    plus_score += len(volle_zeilen)
-    score_rechner = lambda plus_score: plus_score ** 4
-    score += score_rechner(plus_score)
+    score_rechner = lambda plus_score: plus_score ** 2
+    score += score_rechner(len(volle_zeilen)) + plus_score
     return score, stücke
 
 
@@ -260,10 +259,10 @@ def fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernd
     möglich = fallen_oberes_stück(stücke, stück, übersicht_liste)
     if möglich:
         ist_gefallen = True
-    else:
-        ist_verhakung_entfernt = verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
-        if ist_verhakung_entfernt:
-            fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
+    #else:
+        #ist_verhakung_entfernt = verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
+        #if ist_verhakung_entfernt:
+            #fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
     return ist_gefallen
 
 
@@ -387,7 +386,6 @@ def pausieren(Uhr):
 
 def FEN_zeichnen(stücke, score):
     FEN.fill(SCHWARZ)
-    score = 31773451057
     pygame.draw.line(FEN, GRAU, (SEITENABSTAND - DICKE_LINIE, 0), (SEITENABSTAND - DICKE_LINIE, HÖHE + DICKE_LINIE + 2 - KASTENLÄNGE), DICKE_LINIE)
     pygame.draw.line(FEN, GRAU, (BREITE - SEITENABSTAND + DICKE_LINIE, 0), (BREITE - SEITENABSTAND + DICKE_LINIE, HÖHE + DICKE_LINIE + 2 - KASTENLÄNGE), DICKE_LINIE)
     pygame.draw.line(FEN, GRAU, (SEITENABSTAND - int(DICKE_LINIE / 2),HÖHE + DICKE_LINIE - KASTENLÄNGE), (BREITE - SEITENABSTAND + int(DICKE_LINIE / 2),HÖHE + DICKE_LINIE - KASTENLÄNGE), DICKE_LINIE)
@@ -413,7 +411,10 @@ def main():
     werte_dreieck = [(0,125,0), [0, 1], [[0, -1], [0, 0], [1, 0], [0, 1]], [True]]
     werte_punkt = [(125,125,0), [0, 2], [[0, 0]], [False]]
     werte_u = [(0,0,125), [0, 2], [[-1, -1], [-1, 0], [0, 0], [1, 0], [1, -1]], [True]]
-    werte_stücke  = [werte_platte, werte_l_stück_rechts, werte_l_stück_links, werte_quadrat, werte_werte_l_stück_rechts_kurz, werte_dreieck]
+    werte_z_stück_links = [(0,65,125), [0, 2], [[-1, -1], [0, -1], [0, 0], [1, 0]], [True]]
+    werte_z_stück_rechts = [(65,0,125), [0, 2], [[1, -1], [0, -1], [0, 0], [-1, 0]], [True]]
+    werte_comisch = [(65,0,125), [0, 2], [[0, -1], [0, 3], [2, 0], [-4, 0]], [True]]
+    werte_stücke  = [werte_l_stück_rechts, werte_l_stück_links, werte_platte, werte_quadrat, werte_dreieck, werte_z_stück_links, werte_z_stück_rechts]
     stücke = []
     stücke = zufälliges_stück_machen(stücke, werte_stücke)
     uhr = pygame.time.Clock()
