@@ -1,4 +1,6 @@
-Indexe_stück_umdrehen für verhältnisse
+nächstes Stück anzeigen
+Level
+geschwindigkeitserhöhung
 Einstellungen
 Baukasten
 GUI
