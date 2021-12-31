@@ -1,16 +1,19 @@
 import pygame
 import random
 import copy
+
 pygame.init()
 basic_font=pygame.font.SysFont(None, 48)
+
 SCHWARZ = (0, 0, 0)
 ROT = (255, 0, 0)
 LILA = (255, 0, 255)
 LIMETTE = (0, 255, 0)
 BLAU = (0, 0, 255)
 GRAU = (127, 127, 127)
-BREITE = 1000
-SEITENABSTAND = 200
+
+BREITE = 800
+SEITENABSTAND = BREITE // 5 
 DICKE_LINIE = 4
 SPIEL_FELD_BREITE = BREITE - SEITENABSTAND * 2
 KASTENLÄNGE = int((SPIEL_FELD_BREITE) / 10)
@@ -19,12 +22,15 @@ SPIEL_FELD_HÖHE = HÖHE - KASTENLÄNGE
 ABSTAND_ZEILEN_SCORE = 40
 BREITE_ZAHL = 20
 ANZAHL_PASSENDER_ZIFFERN =  (SEITENABSTAND // BREITE_ZAHL) 
+
 FEN = pygame.display.set_mode((BREITE, HÖHE))
 pygame.display.set_caption('TETRIS')
+
 FPS = 60
-NORMAL_GESCHWINDIGKEIT = 10
+NORMAL_GESCHWINDIGKEIT = 20
 VERZÖGERUNG_BEWEGEN = 5
 VERZÖGERUNG_DREHEN = 5
+
 werte_stücke = []
 
 
@@ -40,7 +46,6 @@ class STÜCK:
         self.drehbar = drehbar
         self.x = self.drehpunkt[0] * KASTENLÄNGE 
         self.y = self.drehpunkt[1] * KASTENLÄNGE
-        return
 
     def aktualisieren_zeichnen(self):
         indexe_stück = self.indexe_stück_geben()
@@ -102,14 +107,12 @@ class STÜCK:
                 self.ausrichtung += 1
         return
 
-
 def zufälliges_stück_machen(stücke, werte_stücke):
     werte_stück = werte_stücke[random.randint(0, len(werte_stücke) - 1)]
     stück = copy.deepcopy(STÜCK(werte_stück[0], werte_stück[1], werte_stück[2], random.randint(0, 3), werte_stück[3]))
     stück.verschieben_und_prüfen()
     stücke.append(stück)
     return stücke
-
 
 def übersicht_liste_machen():
     übersicht_liste = []
@@ -119,18 +122,15 @@ def übersicht_liste_machen():
             übersicht_liste[zeile].append(False)
     return übersicht_liste
 
-
 def übersicht_liste_aktualisieren(übersicht_liste, indexe_stück):
     for quadrat in range(len(indexe_stück)):
         übersicht_liste[indexe_stück[quadrat][1]][indexe_stück[quadrat][0]] = True
     return
 
-
 def übersicht_liste_zurücksetzen(übersicht_liste, indexe_stück):
     for quadrat in range(len(indexe_stück)):
         übersicht_liste[indexe_stück[quadrat][1]][indexe_stück[quadrat][0]] = False
     return
-
 
 def volle_zeilen_geben(übersicht_liste):
     volle_zeilen = []
@@ -141,7 +141,6 @@ def volle_zeilen_geben(übersicht_liste):
             if spalte == len(übersicht_liste[0]) - 1:
                 volle_zeilen.append(zeile)
     return volle_zeilen
-
 
 def volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe_stück, stücke, volle_zeilen, score):
     if len(volle_zeilen) > 0:
@@ -156,13 +155,11 @@ def volle_zeilen_zurücksetzen_und_fallen_wenn_möglich(übersicht_liste, indexe
     score += score_rechner(len(volle_zeilen)) + plus_score
     return score, stücke
 
-
 def volle_zeilen_aus_übersicht_liste_zurücksetzen(übersicht_liste, volle_zeilen):
     for volle_zeile in range(len(volle_zeilen)):
         for spalte in range(len(übersicht_liste[0])):
             übersicht_liste[volle_zeilen[volle_zeile]][spalte] = False
     return
-
 
 def quadrate_voller_zeilen_löschen(stücke, volle_zeilen):
     schon_gelöschte_stücke = 0    
@@ -179,7 +176,6 @@ def quadrate_voller_zeilen_löschen(stücke, volle_zeilen):
             schon_gelöschte_stücke += 1
     return
 
-
 def geteilte_stücke_zu_einzelnen_stücken_machen(stücke):
     geteilte_stücke = geteilte_stücke_geben(stücke)
     stücke = []
@@ -187,7 +183,6 @@ def geteilte_stücke_zu_einzelnen_stücken_machen(stücke):
         stück = copy.deepcopy(STÜCK(geteilte_stücke[bruch_stück][0], geteilte_stücke[bruch_stück][1], geteilte_stücke[bruch_stück][2],geteilte_stücke[bruch_stück][3], geteilte_stücke[bruch_stück][4]))
         stücke.append(stück)
     return stücke
-
 
 def geteilte_stücke_geben(stücke):
     geteilte_stücke = []
@@ -204,7 +199,6 @@ def geteilte_stücke_geben(stücke):
                 alle_quadrate_eingeordnet = True
     return geteilte_stücke
 
-
 def verbindung_festellen_und_einordnen(indexe_stück, geteilte_stücke):
     war_verbindung = False
     vergleichs_quadrat = 0
@@ -217,7 +211,6 @@ def verbindung_festellen_und_einordnen(indexe_stück, geteilte_stücke):
         vergleichs_quadrat +=1
     return war_verbindung
 
-
 def ist_verbindung(geteiltes_stück, indexe_stück, vergleichs_quadrat):
     for quadrat in range(len(geteiltes_stück[2])):
         ist_x_unterschied_kleiner_gleich_1 = -1 <= geteiltes_stück[1][0] + geteiltes_stück[2][quadrat][0] - indexe_stück[vergleichs_quadrat][0] <= 1
@@ -225,7 +218,6 @@ def ist_verbindung(geteiltes_stück, indexe_stück, vergleichs_quadrat):
         if ist_x_unterschied_kleiner_gleich_1 and ist_y_unterschied_kleiner_gleich_1:
             return True
     return False
-
 
 def verhältnis_drehpunkt_geben(quadrat, drehpunkt, ausrichtung):
     if ausrichtung == 0:
@@ -236,7 +228,6 @@ def verhältnis_drehpunkt_geben(quadrat, drehpunkt, ausrichtung):
         return [drehpunkt[0] - quadrat[0], drehpunkt[1] - quadrat[0]]
     elif ausrichtung == 3:
         return [quadrat[1] - drehpunkt[0], drehpunkt[1] - quadrat[0]]
-
 
 def fallen_oberer_stücke(übersicht_liste, stücke):
     verhindernde_stücke = {}
@@ -253,7 +244,6 @@ def fallen_oberer_stücke(übersicht_liste, stücke):
         stück += 1
     return nochmal_checken
 
-
 def fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste):
     ist_gefallen = False
     möglich = fallen_oberes_stück(stücke, stück, übersicht_liste)
@@ -265,7 +255,6 @@ def fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernd
             #fallen_und_verhakungen_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste)
     return ist_gefallen
 
-
 def fallen_oberes_stück(stücke, stück, übersicht_liste):
     möglich = False
     indexe_stück = stücke[stück].indexe_stück_geben()
@@ -274,7 +263,6 @@ def fallen_oberes_stück(stücke, stück, übersicht_liste):
         möglich = True
         fallen_oberes_stück(stücke, stück, übersicht_liste)
     return möglich
-
 
 def verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, übersicht_liste):
     ist_verhakung_entfernt = False
@@ -291,7 +279,6 @@ def verhakung_entfernen(stücke, stück, indexe_stück, verhindernde_stücke, ü
             ist_verhakung_entfernt = True
     return ist_verhakung_entfernt
 
-
 def verhindernde_stücke_geben(stücke, stück, indexe_stück):
     verhindernde_stücke = []
     for quadrat in range(len(indexe_stück)):
@@ -305,12 +292,10 @@ def verhindernde_stücke_geben(stücke, stück, indexe_stück):
                             break
     return verhindernde_stücke
 
-
 def verhakung_geben(stück, verhindernde_stücke):
     for verhinderndes_stück in range(len(verhindernde_stücke[stück])):
         if verhindernde_stücke[stück][verhinderndes_stück] in verhindernde_stücke and stück in  verhindernde_stücke[verhindernde_stücke[stück][verhinderndes_stück]]:
             return verhindernde_stücke[stück][verhinderndes_stück]            
-
 
 def zu_einem_stück_machen(stücke, stück, verhaktes_stück):
     indexe_stück_verhakt = stücke[verhaktes_stück].indexe_stück_geben()
@@ -318,14 +303,12 @@ def zu_einem_stück_machen(stücke, stück, verhaktes_stück):
         stücke[stück].verhältnisse_drehpunkt.append(verhältnis_drehpunkt_geben(indexe_stück_verhakt[quadrat], stücke[stück].drehpunkt, stücke[stück].ausrichtung))        
     return
 
-
 def abhängigkeiten_zurücksetzen(stücke, stück, verhindernde_stücke, verhaktes_stück):
     verhindernde_stücke[stück] = verhindernde_stücke[stück] + verhindernde_stücke[verhaktes_stück]
     verhindernde_stücke[stück].remove(stück)
     verhindernde_stücke[stück].remove(verhaktes_stück)
     del stücke[verhaktes_stück]
     return
-
 
 def drehen_möglich(indexe_stück, übersicht_liste, stück, richtung):
     stück.ausrichtung_aendern(richtung)
@@ -343,13 +326,11 @@ def drehen_möglich(indexe_stück, übersicht_liste, stück, richtung):
         stück.ausrichtung_aendern('links')
     return True
 
-
 def fallen_möglich(übersicht_liste, indexe_stück):
     for quadrat in range(len(indexe_stück)):
         if not indexe_stück[quadrat][1] < len(übersicht_liste) - 1 or übersicht_liste[indexe_stück[quadrat][1] + 1][indexe_stück[quadrat][0]]:
              return False
     return True
-
 
 def nach_links_bewegen_möglich(übersicht_liste, indexe_stück):
     for quadrat in range(len(indexe_stück)):
@@ -357,13 +338,11 @@ def nach_links_bewegen_möglich(übersicht_liste, indexe_stück):
              return False
     return True
 
-
 def nach_rechts_bewgen_möglich(übersicht_liste, indexe_stück):
     for quadrat in range(len(indexe_stück)):
         if not indexe_stück[quadrat][0] < len(übersicht_liste[0]) - 1 or übersicht_liste[indexe_stück[quadrat][1]][indexe_stück[quadrat][0] + 1]:
              return False
     return True
-
 
 def ist_spiel_fertig(übersicht_liste, indexe_stück):
     for quadrat in range(len(indexe_stück)):
@@ -371,7 +350,6 @@ def ist_spiel_fertig(übersicht_liste, indexe_stück):
              if not fallen_möglich(übersicht_liste, indexe_stück):
                 return True
     return False
-
 
 def pausieren(Uhr):
     tasten_gedrückt = pygame.key.get_pressed()
@@ -382,7 +360,6 @@ def pausieren(Uhr):
                 return False
         tasten_gedrückt = pygame.key.get_pressed()
     return True
-
 
 def FEN_zeichnen(stücke, score):
     FEN.fill(SCHWARZ)
@@ -414,7 +391,11 @@ def main():
     werte_z_stück_links = [(0,65,125), [0, 2], [[-1, -1], [0, -1], [0, 0], [1, 0]], [True]]
     werte_z_stück_rechts = [(65,0,125), [0, 2], [[1, -1], [0, -1], [0, 0], [-1, 0]], [True]]
     werte_comisch = [(65,0,125), [0, 2], [[0, -1], [0, 3], [2, 0], [-4, 0]], [True]]
-    werte_stücke  = [werte_l_stück_rechts, werte_l_stück_links, werte_platte, werte_quadrat, werte_dreieck, werte_z_stück_links, werte_z_stück_rechts]
+    werte_l_stück_rechts_weird = [LIMETTE, [0, 1], [[0, -1], [0, 0], [0, 1], [2, 1]], [True]]
+    werte_geteilt_zeichen = [(0,125,0), [0, 1], [[-2, 0], [0, 0], [0, 1], [0, -1], [2, 0]], [True]]
+    werte_ellipse = [(0,0,125), [0, 2], [[0, -2], [1, -2], [2, -1], [-1, -2], [-2, -1], [0, 2], [1, 2], [2, 1], [3, 0], [-1, 2], [-2, 1], [-3, 0]], [True]]
+
+    werte_stücke  = [werte_z_stück_rechts, werte_z_stück_links, werte_l_stück_rechts, werte_l_stück_links, werte_platte, werte_quadrat, werte_dreieck, werte_werte_l_stück_rechts_kurz]
     stücke = []
     stücke = zufälliges_stück_machen(stücke, werte_stücke)
     uhr = pygame.time.Clock()
@@ -424,15 +405,19 @@ def main():
     zähler_drehen = VERZÖGERUNG_BEWEGEN
     FEN_zeichnen(stücke, score)
     laufen = pausieren(uhr)
+
     while laufen:
         uhr.tick(FPS)
         FEN_zeichnen(stücke, score)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 laufen = False
                 break
+
         stück = len(stücke) - 1
         indexe_stück = stücke[stück].indexe_stück_geben()
+
         tasten_gedrückt = pygame.key.get_pressed()
         if tasten_gedrückt[pygame.K_p]:
             laufen = pausieren(uhr)
@@ -444,6 +429,7 @@ def main():
             stücke[stück].nach_rechts_bewegen()
             indexe_stück = stücke[stück].indexe_stück_geben()
             zähler_bewegen = -1
+
         if zähler_fallen >= schnelligkeit and ist_spiel_fertig(übersicht_liste, indexe_stück):
             laufen = False
         if zähler_fallen >= schnelligkeit:
@@ -459,6 +445,7 @@ def main():
                 stücke = zufälliges_stück_machen(stücke, werte_stücke)
                 zähler_fallen = -1
                 continue
+
         if (tasten_gedrückt[pygame.K_RIGHT] and stücke[stück].drehbar and
             drehen_möglich(indexe_stück, übersicht_liste, stücke[stück],'rechts') and zähler_drehen >= VERZÖGERUNG_DREHEN):
             stücke[stück].ausrichtung_aendern('rechts')
@@ -473,9 +460,11 @@ def main():
             schnelligkeit = int(NORMAL_GESCHWINDIGKEIT / 5)
         else:
             schnelligkeit = NORMAL_GESCHWINDIGKEIT
+
         zähler_fallen += 1
         zähler_bewegen += 1
         zähler_drehen += 1
+
     pygame.quit()
 
 
